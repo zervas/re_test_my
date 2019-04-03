@@ -1,0 +1,5 @@
+<launch>
+    <group ns="robot1">
+        <node pkg="remy" type="remy_test" name="remy_test" output="screen" />
+    </group>
+</launch>

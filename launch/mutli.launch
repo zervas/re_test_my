@@ -1,0 +1,72 @@
+<launch>
+
+    <group ns="robot1">
+        <param name="tf_prefix" value="robot1_tf" />
+
+            <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
+        <include file="$(find panda_moveit_config)/launch/planning_context.launch">
+            <arg name="load_robot_description" value="true"/>
+            <arg name="robot_description" value="/robot1/robot_description" />
+        </include>
+
+        <include file="$(find panda_moveit_config)/launch/demo.launch" >
+            <arg name="rviz_tutorial" value="false" />
+        </include>
+
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+            <param name="/use_gui" value="true"/>
+            <rosparam param="/source_list">[/robot1/move_group/fake_controller_joint_states]</rosparam>
+        </node>
+
+        <node name="joint_state_desired_publisher" pkg="topic_tools" type="relay" args="joint_states /robot1/joint_states" />
+
+        <!-- Given the published joint states, publish tf for the robot links -->
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+            respawn="true" output="screen">
+
+            <param name="tf_prefix" value="robot1_tf" />
+        </node>
+
+        <node pkg="tf" type="static_transform_publisher" name="robot1_broadcaster"
+            args="1 0 0 0 0 0 1 world /robot1_tf/panda_link0 100" />
+    </group>
+
+    <include file="$(find panda_moveit_config)/launch/move_group.launch">
+        <arg name="allow_trajectory_execution" value="true"/>
+        <arg name="fake_execution" value="false"/>
+        <arg name="info" value="true"/>
+        <arg name="debug" value="false"/>
+    </include>
+
+    <!-- <group ns="robot2">
+        <param name="tf_prefix" value="robot2_tf" />
+
+            
+        <include file="$(find panda_moveit_config)/launch/planning_context.launch">
+            <arg name="load_robot_description" value="true"/>
+            <arg name="robot_description" value="/robot2/robot_description" />
+        </include>
+
+        <include file="$(find panda_moveit_config)/launch/demo.launch" >
+            <arg name="rviz_tutorial" value="false" />
+        </include>
+
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+            <param name="/use_gui" value="false"/>
+            <rosparam param="/source_list">[/robot2/move_group/fake_controller_joint_states]</rosparam>
+        </node>
+
+        <node name="joint_state_desired_publisher" pkg="topic_tools" type="relay" args="joint_states /robot2/joint_states" />
+
+        
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+            respawn="true" output="screen">
+
+            <param name="tf_prefix" value="robot2_tf" />
+        </node>
+
+        <node pkg="tf" type="static_transform_publisher" name="robot2_broadcaster"
+            args="-1 0 0 0 0 0 1 world /robot2_tf/panda_link0 100" />
+    </group> -->
+
+</launch>
