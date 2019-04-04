@@ -1,4 +1,4 @@
-#  REMY Robotics - Software Engineering Test Task 
+#  R**Y Robotics - Software Engineering Test Task 
 
 This is a basic code that included the basic components that are described with the accompanied document.
 
