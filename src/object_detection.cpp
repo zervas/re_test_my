@@ -8,7 +8,6 @@ bool get_pose(remy::ObjectDetection::Request &req,
     // call the object detection service here that takes as
     // parameter the object to detect (tool, pizza, etc)
     /* geometry_msgs/Pose ee_goal = get_goal_pose(req.object) */
-
     // Fake the result
     res.goal_pose.position.x = 0.232;
     res.goal_pose.position.y = 0.1;
@@ -23,7 +22,7 @@ int main(int argc, char **argv) {
   ros::NodeHandle node_handle;
 
   ros::ServiceServer service = node_handle.advertiseService(
-      "object_dettection", get_pose);
+      "object_detection", get_pose);
 
   ros::spin();
   return 0;

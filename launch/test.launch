@@ -1,5 +1,4 @@
 <launch>
-    <group ns="robot1">
-        <node pkg="remy" type="remy_test" name="remy_test" output="screen" />
-    </group>
+    <node pkg="remy" type="cook" name="cook" output="screen" />
+    <node pkg="remy" type="object_detection" name="object_detection" output="screen" />
 </launch>

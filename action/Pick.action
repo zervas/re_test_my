@@ -1,8 +1,8 @@
 #goal definition
-geometry_msgs/Pose pose
+string tool
 ---
 #result definition
 bool status
 ---
 #feedback
-string[] status
+string status

@@ -1,6 +1,10 @@
+#ifndef REMY_PICK_H_
+#define REMY_PICK_H_
 #include <ros/ros.h>
 #include "geometry_msgs/Pose.h"
 #include <remy/PickAction.h>
+#include "remy/PlanAction.h"
+#include <string>
 #include "remy/ObjectDetection.h"
 #include "remy/robot_planner.h"
 
@@ -15,7 +19,7 @@ class Pick : RobotPlanner {
     remy::PickResult result_;
     remy::PickFeedback feedback_;
     // * The client for the object detection service
-    ros::ServiceClient object_detection =
+    ros::ServiceClient object_detection_ =
         nh_.serviceClient<remy::ObjectDetection>("object_detection");
     geometry_msgs::Pose goal_pose_;
 
@@ -41,7 +45,7 @@ class Pick : RobotPlanner {
 
  public:
     Pick(std::string name) : action_(
-        nh_, name, boost::bind(&Pick::executeCB, this, _1),
+        nh_, (name + "_pick"), boost::bind(&Pick::executeCB, this, _1),
         false), name_(name) {
 
         action_.start();
@@ -53,7 +57,7 @@ class Pick : RobotPlanner {
         bool success = true;
 
         feedback_.status.clear();
-        feedback_.status.push_back("'Pick' for" + name_ + " started");
+        feedback_.status = "Pick for " + name_ + " started";
         action_.publishFeedback(feedback_);
 
         if (action_.isPreemptRequested() || !ros::ok()) {
@@ -63,24 +67,49 @@ class Pick : RobotPlanner {
             action_.setSucceeded(result_);
         }
 
+
         // Call object detectin to get the end effector goal position
         remy::ObjectDetection srv;
         // srv.request.object = goal->pose;
         srv.request.object = goal->tool;
-        if (object_detection.call(srv)) {
+        if (object_detection_.call(srv)) {
             // Give feedback to the client
-            feedback_.status.push_back("Object Detection successfull");
+            feedback_.status = "Object Detection successfull";
             action_.publishFeedback(feedback_);
             // Get the planner's goal
             geometry_msgs::Pose ee_goal = srv.response.goal_pose;
-            setMoveGroup("panda_arm", robot_);
-            feedback_.status.push_back("Starting the planner");
+            // setMoveGroup("panda_arm", robot_);   // in FAKE mode
+            feedback_.status = "Starting the planner";
             action_.publishFeedback(feedback_);
-            plan(ee_goal);
-            // Check for the success of the planner
-            /* ... */
-            result_.status = true;
-            action_.setSucceeded(result_);
+            //  planner call
+            actionlib::SimpleActionClient<remy::PlanAction> plan_client(
+                "joint_space_planner", true);
+            plan_client.waitForServer();
+            remy::PlanGoal goal;
+            goal.pose = ee_goal;
+            plan_client.sendGoal(goal);
+            bool finished_before_timeout =
+                plan_client.waitForResult(ros::Duration(5.0));
+
+            if (finished_before_timeout) {
+                actionlib::SimpleClientGoalState state = plan_client.getState();
+                ROS_INFO("Action finished: %s", state.toString().c_str());
+            } else {
+                ROS_INFO("Action did not finish before the time out");
+                success = false;
+            }
+
+
+        } else {
+            ROS_INFO("WTF");
+        }
+
+        if (success) {
+           result_.status = true;
+           // set the action state to succeeded
+           action_.setSucceeded(result_);
+        } else {
+            action_.setPreempted();
         }
     }
 
@@ -90,12 +119,4 @@ class Pick : RobotPlanner {
     }
 };
 
-
-// int main(int argc, char **argv) {
-//     ros::init(argc, argv, "pick_action");
-
-//     Pick pick("left_robot");
-
-//     ros::spin();
-//     return 0;
-// }
+#endif  // REMY_PICK_H_
