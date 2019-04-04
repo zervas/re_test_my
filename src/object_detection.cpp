@@ -3,8 +3,7 @@
 
 
 bool get_pose(remy::ObjectDetection::Request &req,
-         remy::ObjectDetection::Response &res) {
-
+              remy::ObjectDetection::Response &res) {
     // call the object detection service here that takes as
     // parameter the object to detect (tool, pizza, etc)
     /* geometry_msgs/Pose ee_goal = get_goal_pose(req.object) */

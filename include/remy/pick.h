@@ -23,26 +23,6 @@ class Pick : RobotPlanner {
         nh_.serviceClient<remy::ObjectDetection>("object_detection");
     geometry_msgs::Pose goal_pose_;
 
- private:
-    void run(std::string &tool) {
-        actionlib::SimpleActionClient<remy::PickAction> client(
-            "pick_client", true);
-        client.waitForServer();
-        remy::PickGoal goal;
-        goal.tool = tool;
-        client.sendGoal(goal);
-
-        bool finished_before_timeout =
-            client.waitForResult(ros::Duration(30.0));
-
-        if (finished_before_timeout) {
-            actionlib::SimpleClientGoalState state = client.getState();
-            ROS_INFO("Action finished: %s", state.toString().c_str());
-        } else {
-            ROS_INFO("Action did not finish before the time out");
-        }
-    }
-
  public:
     Pick(std::string name) : action_(
         nh_, (name + "_pick"), boost::bind(&Pick::executeCB, this, _1),
@@ -70,10 +50,8 @@ class Pick : RobotPlanner {
 
         // Call object detectin to get the end effector goal position
         remy::ObjectDetection srv;
-        // srv.request.object = goal->pose;
         srv.request.object = goal->tool;
         if (object_detection_.call(srv)) {
-            // Give feedback to the client
             feedback_.status = "Object Detection successfull";
             action_.publishFeedback(feedback_);
             // Get the planner's goal
@@ -99,23 +77,16 @@ class Pick : RobotPlanner {
                 success = false;
             }
 
-
         } else {
-            ROS_INFO("WTF");
+            ROS_INFO("Object Detection failed!!!");
         }
 
         if (success) {
            result_.status = true;
-           // set the action state to succeeded
            action_.setSucceeded(result_);
         } else {
             action_.setPreempted();
         }
-    }
-
-    void pick(std::string robot, std::string tool) {
-        robot_ = robot;
-        run(tool);
     }
 };
 

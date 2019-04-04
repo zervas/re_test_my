@@ -7,13 +7,14 @@
 int main(int argc, char **argv) {
     ros::init(argc, argv, "chef");
 
+    // The robot to command
     std::string robot_name("left_hand");
 
     actionlib::SimpleActionClient<remy::PickAction> client(
         robot_name + "_pick", true);
     client.waitForServer();
     remy::PickGoal goal;
-    goal.tool = "whatever";
+    goal.tool = "tomato";
     client.sendGoal(goal);
 
     bool finished_before_timeout =
@@ -25,7 +26,7 @@ int main(int argc, char **argv) {
     } else {
         ROS_INFO("Action did not finish before the time out");
     }
-    
+
     ros::spin();
     return 0;
 }
