@@ -1,8 +1,7 @@
 #include <ros/ros.h>
-#include <actionlib/server/simple_action_server.h>
-#include <remy/PickAction.h>
 #include "remy/ObjectDetection.h"
 #include "geometry_msgs/Pose.h"
+#include <string>
 // MoveIt
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
@@ -13,15 +12,24 @@
 #include <moveit_msgs/CollisionObject.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
 
+#include <actionlib/server/simple_action_server.h>
+#include <actionlib/client/simple_action_client.h>
+#include <actionlib/client/terminal_state.h>
+#include <remy/RobotPlanAction.h>
+
+
 
 class RobotPlanner {
  protected:
     ros::NodeHandle nh_;
-    static const std::string group_;
+    actionlib::SimpleActionServer<remy::RobotPlanAction> my_action_;
     moveit::planning_interface::MoveGroupInterface *move_group_;
     const robot_state::JointModelGroup* joint_model_group_;
     moveit::planning_interface::MoveGroupInterface::Plan movement_;
     double planning_time_;
+    // Action
+    // remy::RobotPlanFeedback my_feedback_;
+    // remy::RobotPlanResult my_result_;
 
 
     void setMoveGroup(const std::string group_name,
@@ -34,7 +42,7 @@ class RobotPlanner {
         move_group_ = new moveit::planning_interface::MoveGroupInterface(
             options_, NULL, wait_for);
         joint_model_group_ =
-            move_group_->getCurrentState()->getJointModelGroup(group_);
+            move_group_->getCurrentState()->getJointModelGroup(group_name);
     }
 
     void setPlanningScene() { /* TODO */ }
@@ -68,9 +76,5 @@ class RobotPlanner {
         planning_time_ = 10.0;
     }
 
-    ~RobotPlanner(){}
+    virtual ~RobotPlanner(){}
 };
-
-int main() {
-    return 0;
-}

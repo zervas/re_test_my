@@ -46,6 +46,7 @@ add_action_files(
   FILES
   Fibonacci.action
   Pick.action
+  Plan.action
 )
 
 
@@ -83,8 +84,8 @@ add_executable(pick src/pick.cpp)
 
 # add_dependencies(planner ${catkin_EXPORTED_TARGETS})
 # add_dependencies(action_server ${catkin_EXPORTED_TARGETS})
-add_dependencies(pick ${catkin_EXPORTED_TARGETS})
-# add_dependencies(action_client ${catkin_EXPORTED_TARGETS})
+add_dependencies(pick ${pick_EXPORTED_TARGETS}  ${catkin_EXPORTED_TARGETS})
+# add_dependencies(action_client ${ })
 # add_dependencies(object_detection ${catkin_EXPORTED_TARGETS})
 # add_dependencies(srv_client ${catkin_EXPORTED_TARGETS})
 # add_dependencies(my_planning_scene_api ${catkin_EXPORTED_TARGETS})

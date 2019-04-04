@@ -12,10 +12,11 @@ class PickAction : RobotPlanner {
  protected:
     ros::NodeHandle nh_;
     actionlib::SimpleActionServer<remy::PickAction> action_;
-    std::string action_name_;
+    std::string action_name_;   // * <---
     remy::PickFeedback feedback_;
     remy::PickResult result_;
-    std::string object_type_;
+    std::string object_type_;   // * <---
+    // * The client for the object detection service
     ros::ServiceClient object_detection =
         nh_.serviceClient<remy::ObjectDetection>("object_detection");
     geometry_msgs::Pose goal_pose_;

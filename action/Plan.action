@@ -1,0 +1,8 @@
+# goal
+geometry_msgs/Pose my_pose
+---
+# result
+bool my_status
+---
+# feedback
+string[] my_status

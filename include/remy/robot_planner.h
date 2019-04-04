@@ -2,10 +2,9 @@
 #define REMY_ROBOT_PLANNER_H_
 
 #include <ros/ros.h>
-#include <actionlib/server/simple_action_server.h>
-#include <remy/PickAction.h>
 #include "remy/ObjectDetection.h"
 #include "geometry_msgs/Pose.h"
+#include <string>
 // MoveIt
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
@@ -15,7 +14,13 @@
 #include <moveit_msgs/AttachedCollisionObject.h>
 #include <moveit_msgs/CollisionObject.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
-#include <string>
+
+#include <actionlib/server/simple_action_server.h>
+#include <actionlib/client/simple_action_client.h>
+#include <actionlib/client/terminal_state.h>
+#include "remy/PlanAction.h"
+#include <remy/PickAction.h>
+
 
 
 class RobotPlanner {
@@ -25,6 +30,11 @@ class RobotPlanner {
     const robot_state::JointModelGroup* joint_model_group_;
     moveit::planning_interface::MoveGroupInterface::Plan movement_;
     double planning_time_;
+    std::string action_name_;
+    // Action
+    actionlib::SimpleActionServer<remy::PlanAction> my_action_;
+    remy::PlanFeedback my_feedback_;
+    remy::PlanResult my_result_;
 
 
     void setMoveGroup(const std::string group_name,
@@ -66,12 +76,19 @@ class RobotPlanner {
  private:
     /* data */
  public:
-    RobotPlanner() {
+    RobotPlanner() : my_action_(
+        nh_, "dummy_planner", boost::bind(&RobotPlanner::executeCB, this, _1),
+        false) {
+
         // TODO(Get these from rosparam set by launch file)
         planning_time_ = 10.0;
     }
 
-    ~RobotPlanner(){}
+    virtual ~RobotPlanner() {}
+
+    void executeCB(const remy::PlanGoalConstPtr &goal) {
+        bool success = true;
+    }
 };
 
 #endif  // REMY_ROBOT_PLANNER_H_
